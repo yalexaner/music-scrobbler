@@ -1,0 +1,12 @@
+{
+    "manifest_version": 2,
+    "name": "Music Scrobbler",
+    "short_name": "Scrobbler",
+    "version": "1.0",
+    "description": "Scrobbles playing songs from Yandex Radio to your Last.fm account",
+    "author": "yalexaner",
+    "page_action": {
+        "default_title": "Music Scrobbler",
+        "default_popup": "popup.html"
+    }
+}
