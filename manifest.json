@@ -4,7 +4,7 @@
     "short_name": "Scrobbler",
     "version": "0.1",
     "author": "yalexaner",
-    "permissions": ["declarativeContent"],
+    "permissions": ["storage", "declarativeContent"],
     "background": {
       "scripts": ["background.js"],
       "persistent": false
@@ -13,5 +13,13 @@
         "default_title": "Music Scrobbler",
         "default_popup": "popup.html"
     },
-    "manifest_version": 2
+    "manifest_version": 2,
+    "content_scripts": [
+        {
+            "matches": [
+                "https://radio.yandex.ru/*"
+            ],
+            "js": ["arrive.min.js", "contents/yandex_radio.js"]
+        }
+    ]
 }
