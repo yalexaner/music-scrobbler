@@ -1,21 +1,21 @@
 // variable to check the song has already been scrobbled
 // it's need because arrive does more than one call
-let currentSong = {"artist": null, "song": null};
+let currentSong = {title: null, artist: null};
 
 let port = chrome.runtime.connect({name: "Content connection"});
 
-// waiting for element to be created
-// then get its data and send it to background
-document.arrive(".player-controls__info", {existing: true}, function(songData) {
-    let songName = songData.firstChild.textContent;
-    let artistName = songData.childNodes[1].firstChild.textContent;
+// waiting for song element to be created
+// then get its data and send it to background file
+document.arrive(".player-controls__info", function(songData) {
+    let title = songData.firstChild.textContent;
+    let artist = songData.childNodes[1].firstChild.textContent;
 
-    // duplicate song change
-    if (currentSong["artist"] == artistName && currentSong["song"] == songName) return;
+    // 'song changed' event already called
+    if (currentSong.title == title && currentSong.artist == artist) return;
 
     // remember the song
-    currentSong["artist"] = artistName;
-    currentSong["song"] = songName;
+    currentSong.title = title;
+    currentSong.artist = artist;
 
-    port.postMessage({artist: artistName, song: songName});
+    port.postMessage({title: title, artist: artist});
 });
