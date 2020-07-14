@@ -12,10 +12,17 @@ chrome.runtime.onInstalled.addListener(function() {
     });
 });
 
-// save song data to local store
-// so it can be displayed in popup
 chrome.runtime.onConnect.addListener(function(port) {
     port.onMessage.addListener(function(song) {
-        chrome.storage.local.set({title: song.title, artist: song.artist});
+        // half of the song passed
+        // it can be scrobbled
+        if (song.canBeScrobbled)
+            console.log("Song scrobbled");
+
+        // song just started
+        // save song data to local store
+        // so it can be displayed in popup
+        else
+            chrome.storage.local.set({title: song.title, artist: song.artist});
     });
 });
