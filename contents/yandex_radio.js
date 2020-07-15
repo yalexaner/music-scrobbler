@@ -110,3 +110,20 @@ const songProgress = new MutationObserver(function(mutationsList, observer) {
         observer.disconnect();
     }
 });
+
+// fired when the tab is being closed
+window.addEventListener("unload", function(event) {
+    // scrobble song if the half of it already past
+    if (song.title != null && song.canBeScrobbled) {
+        backgroundPort.postMessage({
+            title: song.title,
+            artist: song.artist,
+            album: song.album,
+            duration: song.duration,
+            albumNumber: song.albumNumber,
+            albumArtist: song.albumArtist,
+            startPlaying: song.startPlaying,
+            chosenByUser: song.chosenByUser,
+        });
+    };
+});
