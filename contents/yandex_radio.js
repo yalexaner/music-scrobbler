@@ -126,4 +126,6 @@ window.addEventListener("unload", function(event) {
             chosenByUser: song.chosenByUser,
         });
     };
+
+    chrome.storage.local.clear();
 });
