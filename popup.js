@@ -1,3 +1,5 @@
+"use strict";
+
 const title = document.querySelector("#title");
 const artist = document.querySelector("#artist");
 

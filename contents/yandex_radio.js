@@ -1,32 +1,93 @@
-// variable to check the song has already been scrobbled
-let currentSong = {title: null, artist: null};
+"use strict";
 
-let port = chrome.runtime.connect({name: "Content connection"});
+// currently scrobbling song
+let song = {
+    title: null,
+    artist: null,
+    album: null,
+    duration: null,
+    albumNumber: null,
+    albumArtist: null,
+    startPlaying: null,
+    chosenByUser: 0,
+    canBeScrobbled: false
+};
+
+// connection to background file to send song data for scrobbling
+let backgroundPort = chrome.runtime.connect({name: "Background connection"});
+
+// connection to yandex_radio background file to get song data
+let yandexPort = chrome.runtime.connect({name: "Yandex Radio Background Connection"});
 
 // waiting for song element to be created
+// (also is called when the song element is changed)
 // then get its data and send it to background file
 // and check for the song progress
 document.arrive(".player-controls__info", function(songData) {
     let title = songData.firstChild.textContent;
     let artist = songData.childNodes[1].firstChild.textContent;
 
-    // 'song changed' event already called
-    if (currentSong.title == title && currentSong.artist == artist) return;
+    // song data already exists
+    if (song.title == title && song.artist == artist) return;
+
+    // if this is not the first song
+    // pass the previous song data to the
+    // background file so it can be scrobbled
+    if (song.title != null && song.canBeScrobbled) {
+        backgroundPort.postMessage({
+            title: song.title,
+            artist: song.artist,
+            album: song.album,
+            duration: song.duration,
+            albumNumber: song.albumNumber,
+            albumArtist: song.albumArtist,
+            startPlaying: song.startPlaying,
+            chosenByUser: song.chosenByUser,
+        });
+
+        song.canBeScrobbled = false;
+    };
 
     // remember the song
-    currentSong.title = title;
-    currentSong.artist = artist;
+    song.title = title;
+    song.artist = artist;
+    song.startPlaying = Date.now();
 
-    port.postMessage({title: title, artist: artist, canBeScrobbled: false});
+    // save song data to local store
+    // so it can be displayed in popup
+    chrome.storage.local.set({title: song.title, artist: song.artist});
 
+    // start getting the rest song data
+    retrieveSongData();
+
+    // start observing song progress changes
+    observeSongProgressChanges();
+});
+
+// get the rest song data
+let retrieveSongData = function() {
+    let songIdx = document.querySelector(".slider__item_playing").firstChild.getAttribute("data-idx");
+
+    yandexPort.postMessage(songIdx);
+};
+
+// when the rest data is ready onMessage is called
+yandexPort.onMessage.addListener(function(newSong) {
+    song.album = newSong.album;
+    song.duration = newSong.duration;
+    song.albumNumber = newSong.albumNumber;
+    song.albumArtist = newSong.albumArtist;
+});
+
+const observeSongProgressChanges = function() {
     // node to observe music progress changes
     const targetNode = document.querySelector(".progress__shape_play");
 
     // receives slider changes of playing song
     songProgress.observe(targetNode, { attributes: true, subtree: true });
-});
+};
 
-// observes song progress changes
+// observer to observe song progress changes
 const songProgress = new MutationObserver(function(mutationsList, observer) {
     const xFinal = 34;
     const yFinal = 64;
@@ -42,11 +103,7 @@ const songProgress = new MutationObserver(function(mutationsList, observer) {
 
     // half of the song passed
     if (x < xFinal && y > yFinal) {
-        port.postMessage({
-            title: currentSong.title,
-            artist: currentSong.artist,
-            canBeScrobbled: true
-        });
+        song.canBeScrobbled = true;
 
         // song is scrobbled
         // stop getting events of song progress changes
