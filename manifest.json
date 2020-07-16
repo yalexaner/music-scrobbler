@@ -2,18 +2,21 @@
     "name": "Music Scrobbler",
     "description": "Scrobbles playing songs from Yandex Radio to your Last.fm account",
     "short_name": "Scrobbler",
-    "version": "0.1",
     "author": "yalexaner",
+    "version": "0.1",
+
     "permissions": ["storage", "declarativeContent", "https://music.yandex.ru/*"],
-    "background": {
-      "scripts": ["backgrounds/background.js", "backgrounds/yandex_radio.js"],
-      "persistent": false
-    },
+
     "page_action": {
         "default_title": "Music Scrobbler",
         "default_popup": "popup.html"
     },
-    "manifest_version": 2,
+
+    "background": {
+      "scripts": ["backgrounds/background.js", "backgrounds/yandex_radio.js"],
+      "persistent": false
+    },
+
     "content_scripts": [
         {
             "matches": [
@@ -21,5 +24,7 @@
             ],
             "js": ["libs/arrive.min.js", "contents/yandex_radio.js"]
         }
-    ]
+    ],
+
+    "manifest_version": 2
 }
